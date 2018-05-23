@@ -16,7 +16,6 @@
     "lodash": "4.17.5",
     "lokka": "1.7.0",
     "lokka-transport-http": "1.6.1",
-    "node-fetch": "^2.1.2",
     "nodemon": "1.17.2"
   },
   "engines": {

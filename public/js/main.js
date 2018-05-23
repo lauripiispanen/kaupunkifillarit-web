@@ -137,6 +137,26 @@ function createOrUpdateLocationMarker(userLatLng) {
   }
 }
 
+function userIsInsideBikeArea(position) {
+  var theatreWestSouthPoint = {
+    lat: 60.152162,
+    lng: 24.910469
+  }
+  var theatreEastNorthPoint = {
+    lat: 60.191951,
+    lng: 24.985142
+  }
+
+  var latMin = theatreWestSouthPoint.lat
+  var latMax = theatreEastNorthPoint.lat
+  var lngMin = theatreWestSouthPoint.lng
+  var lngMax = theatreEastNorthPoint.lng
+
+  var latInside = position.coords.latitude <= latMax && position.coords.latitude >= latMin
+  var lngInside = position.coords.longitude <= lngMax && position.coords.longitude >= lngMin
+
+  return latInside && lngInside
+}
 
 function geolocationSuccess(position) {
   var userLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
@@ -144,7 +164,7 @@ function geolocationSuccess(position) {
   createOrUpdateLocationMarker(userLatLng)
   setupHeadingMarker(userLatLng)
 
-  if (!mapPannedThisSession) {
+  if (userIsInsideBikeArea(position) && !mapPannedThisSession) {
     map.panTo(userLatLng)
     mapPannedThisSession = true
   }
