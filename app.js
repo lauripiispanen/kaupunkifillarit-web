@@ -7,7 +7,7 @@ const fetch = require('node-fetch')
 
 const app = express()
 const HSL_GRAPHQL_URL = 'https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql'
-const FOLI_REST_URL = 'http://data.foli.fi/citybike'
+const FOLI_REST_URL = 'https://data.foli.fi/citybike'
 const graphQLClient = new Lokka({
   transport: new Transport(HSL_GRAPHQL_URL)
 })
