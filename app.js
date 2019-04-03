@@ -49,6 +49,7 @@ function refreshStationCacheHSL() {
         id,
         lat,
         lon,
+        name,
         bikesAvailable,
         spacesAvailable,
         state
