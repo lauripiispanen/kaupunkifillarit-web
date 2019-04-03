@@ -21,7 +21,7 @@ app.use(express.static('./public', {maxAge: 30 * 60 * 1000}))
 app.get('/api/stations', (req, res) => {
   res.setHeader('Cache-Control', 'public, max-age=5')
   res.json({
-    bikeRentalStations: Object.values(stationCaches).flatMap(cache => cache.bikeRentalStations)
+    bikeRentalStations: Object.values(stationCaches)
   })
 })
 
@@ -29,16 +29,14 @@ function refreshStationCacheFoli() {
   fetch(FOLI_REST_URL)
     .then(res => res.json())
     .then(data => Object.values(data.racks))
-    .then(racks => ({
-        bikeRentalStations: racks.map(rack => ({
-          id: rack.id,
-          name: rack.name,
-          lat: rack.lat,
-          lon: rack.lon,
-          bikesAvailable: rack.bikes_avail,
-          spacesAvailable: rack.slots_avail
-        }))
-      })
+    .then(racks => racks.map(rack => ({
+        id: rack.id,
+        name: rack.name,
+        lat: rack.lat,
+        lon: rack.lon,
+        bikesAvailable: rack.bikes_avail,
+        spacesAvailable: rack.slots_avail
+      }))
     ).then(result => {
       stationCaches.foli = result
     })
@@ -49,7 +47,6 @@ function refreshStationCacheHSL() {
     {
       bikeRentalStations {
         id,
-        name,
         lat,
         lon,
         bikesAvailable,
@@ -60,7 +57,16 @@ function refreshStationCacheHSL() {
   `).then(result => {
     stationCaches.hsl = result.bikeRentalStations
       .map(station => {
-        station.active = station.state === 'Station off' ? false : true
+        switch (station.state) {
+          case 'Station off':
+            station.active = false
+          case 'Station on':
+            station.active = true
+          default:
+            station.active = true
+        }
+
+        delete station.state
         return station
       })
       .filter(station => station.active)
