@@ -21,7 +21,7 @@ app.use(express.static('./public', {maxAge: 30 * 60 * 1000}))
 app.get('/api/stations', (req, res) => {
   res.setHeader('Cache-Control', 'public, max-age=5')
   res.json({
-    bikeRentalStations: Object.values(stationCaches)
+    bikeRentalStations: Object.values(stationCaches).flat()
   })
 })
 
