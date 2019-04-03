@@ -53,11 +53,17 @@ function refreshStationCacheHSL() {
         lat,
         lon,
         bikesAvailable,
-        spacesAvailable
+        spacesAvailable,
+        state
       }
     }
   `).then(result => {
-    stationCaches.hsl = result
+    stationCaches.hsl = result.bikeRentalStations
+      .map(station => {
+        station.active = station.state === 'Station off' ? false : true
+        return station
+      })
+      .filter(station => station.active)
   })
 }
 
