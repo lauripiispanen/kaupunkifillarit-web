@@ -58,15 +58,11 @@ function refreshStationCacheHSL() {
   `).then(result => {
     stationCaches.hsl = result.bikeRentalStations
       .map(station => {
-        switch (station.state) {
-          case 'Station off':
-            station.active = false
-          case 'Station on':
-            station.active = true
-          default:
-            station.active = true
+        if (station.state === 'Station off') {
+          station.active = false
+        } else {
+          station.active = true
         }
-
         delete station.state
         return station
       })
