@@ -8,8 +8,12 @@ const fetch = require('node-fetch')
 const app = express()
 const HSL_GRAPHQL_URL = 'https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql'
 const FOLI_REST_URL = 'https://data.foli.fi/citybike'
-const graphQLClient = new Lokka({
+const SYKKELI_GRAPHQL_URL = 'https://api.oulunliikenne.fi/proxy/graphql'
+const hslGraphQLClient = new Lokka({
   transport: new Transport(HSL_GRAPHQL_URL)
+})
+const sykkeliGraphQLClient = new Lokka({
+  transport: new Transport(SYKKELI_GRAPHQL_URL)
 })
 
 let stationCaches = {}
@@ -43,7 +47,7 @@ function refreshStationCacheFoli() {
 }
 
 function refreshStationCacheHSL() {
-  graphQLClient.query(`
+  hslGraphQLClient.query(`
     {
       bikeRentalStations {
         id,
@@ -70,9 +74,37 @@ function refreshStationCacheHSL() {
   })
 }
 
+function refreshStationCacheSykkeli() {
+  sykkeliGraphQLClient.query(`
+    {
+      bikeRentalStations {
+        id,
+        lat,
+        lon,
+        name,
+        bikesAvailable,
+        spacesAvailable,
+        state
+      }
+    }
+  `).then(result => {
+    stationCaches.sykkeli = result.bikeRentalStations
+      .map(station => {
+        if (station.state === 'Station off') {
+          station.active = false
+        } else {
+          station.active = true
+        }
+        delete station.state
+        return station
+      })
+      .filter(station => station.active)
+  })
+}
 function refreshStationCaches() {
   refreshStationCacheFoli()
   refreshStationCacheHSL()
+  refreshStationCacheSykkeli()
 }
 
 const port = process.env.PORT || 3000
